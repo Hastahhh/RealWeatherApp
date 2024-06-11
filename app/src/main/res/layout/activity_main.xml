@@ -7,6 +7,38 @@
     tools:context=".MainActivity"
     android:background="@color/teal_700">
 
+    <ImageView
+        android:id="@+id/searchIcon"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/ic_search"
+        app:tint="@color/white"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="70dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <EditText
+        android:id="@+id/city"
+        android:layout_width="230dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@id/searchIcon"
+        android:background="@color/white"
+        android:layout_marginStart="20dp"
+        app:layout_constraintLeft_toLeftOf="parent"/>
+
+    <ImageView
+        android:id="@+id/btnGPS"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:src="@drawable/location"
+        app:tint="@color/white"
+        android:layout_marginEnd="22dp"
+        android:layout_marginTop="70dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintRight_toRightOf="parent"/>
+
     <TextView
         android:id="@+id/address"
         android:layout_width="wrap_content"
@@ -16,7 +48,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="120dp"
         />
 
     <TextView
@@ -28,7 +60,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="70dp"
+        android:layout_marginTop="160dp"
         />
 
     <TextView
@@ -37,7 +69,7 @@
         android:layout_height="wrap_content"
         android:textSize="18dp"
         android:layout_gravity="center"
-        android:text="Céu limpo"
+        android:text="Nublado"
         app:layout_constraintBottom_toTopOf="@+id/temp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -58,27 +90,41 @@
         />
 
     <TextView
-        android:id="@+id/temp_min"
+        android:id="@+id/text_temp_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Temp Min: 15°C"
+        android:text="Temp Min:"
         app:layout_constraintTop_toBottomOf="@+id/temp"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="100dp"
 
         />
-
-
     <TextView
-        android:id="@+id/temp_max"
+        android:id="@+id/temp_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Temp Max: 32°C"
+        android:text=" 15°C"
+        app:layout_constraintTop_toBottomOf="@+id/temp"
+        app:layout_constraintLeft_toRightOf="@+id/text_temp_min"
+        />
+
+    <TextView
+        android:id="@+id/text_temp_max"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Temp Max:"
         app:layout_constraintLeft_toRightOf="@+id/temp_min"
         app:layout_constraintTop_toBottomOf="@+id/temp"
         android:layout_marginStart="10dp"
         />
-
+    <TextView
+        android:id="@+id/temp_max"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=" 30°C"
+        app:layout_constraintTop_toBottomOf="@+id/temp"
+        app:layout_constraintLeft_toRightOf="@+id/text_temp_max"
+        />
 
     <LinearLayout
         android:id="@+id/SunriseInfo"
@@ -107,7 +153,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            android:text="Sunrise"
+            android:text="Amanhecer"
             />
 
         <TextView
@@ -146,7 +192,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            android:text="Sunset"
+            android:text="Anoitecer"
             />
 
         <TextView
@@ -183,7 +229,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            android:text="Wind"
+            android:text="Vento"
             />
 
         <TextView
@@ -221,7 +267,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            android:text="Pressure"/>
+            android:text="Pressão"/>
 
         <TextView
             android:id="@+id/pressure"
@@ -258,7 +304,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12dp"
-            android:text="Humidity"
+            android:text="Humidade"
             />
 
         <TextView

@@ -11,8 +11,9 @@ interface API {
 
         @GET("data/2.5/weather")
         fun getData(
-            @Query("q") query: String,  // Parâmetro de consulta "q"
-            @Query("unit") unit: String = "metric",
+            @Query("q") query: String = "Lisbon",  // Parâmetro de consulta "q"
+            @Query("units") unit: String = "metric",
+            @Query("lang") lang: String = "pt",
             @Query("appid") apiKey: String = "3064d7e8bfc22727461fc258451b5ad2"
         ): Call<Response>
 
@@ -20,7 +21,7 @@ interface API {
         fun create(): API {
             val retrofit = Retrofit.Builder()
                 .addConverterFactory(MoshiConverterFactory.create())
-                .baseUrl("http://api.openweathermap.org/")
+                .baseUrl("https://api.openweathermap.org/")
                 .build()
 
 

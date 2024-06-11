@@ -1,6 +1,6 @@
 package pt.ipt.henri.realweatherapp;
 
-data class Temp(
+data class Main(
         val temp: String,
         val temp_min: String,
         val temp_max: String,
