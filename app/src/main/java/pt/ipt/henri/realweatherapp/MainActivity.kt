@@ -1,33 +1,39 @@
 package pt.ipt.henri.realweatherapp
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import okhttp3.Address
+import androidx.core.content.ContextCompat
 import retrofit2.Call
 import retrofit2.Callback
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), LocationListener {
 
-    val wList = mutableListOf<Weather>()
-    val auxList = mutableListOf<Weather>()
-    private val rCode = 1
-    private val lCode = 2
-    //private lateinit var city: String
+    private val wList = mutableListOf<Weather>()
+    private val auxList = mutableListOf<Weather>()
+    private val locationPermissionCode = 101
+    private lateinit var locationManager: LocationManager
+
     private lateinit var address: TextView
     private lateinit var status: TextView
     private lateinit var temp: TextView
@@ -39,13 +45,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pressure: TextView
     private lateinit var humidity: TextView
     private lateinit var todayHour: TextView
+    private lateinit var btnGPS: ImageView
+    private lateinit var btnSearch: ImageView
+    private lateinit var searchCity: EditText
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        //enableEdgeToEdge()
         setContentView(R.layout.activity_main)
-        callCity()
 
+        address = findViewById(R.id.address)
         status = findViewById(R.id.status)
         temp = findViewById(R.id.temp)
         tempMin = findViewById(R.id.temp_min)
@@ -56,19 +66,39 @@ class MainActivity : AppCompatActivity() {
         pressure = findViewById(R.id.pressure)
         humidity = findViewById(R.id.humidity)
         todayHour = findViewById(R.id.updated_at)
-        address = findViewById(R.id.address)
+        btnGPS = findViewById(R.id.btnGPS)
+        btnSearch = findViewById(R.id.searchIcon)
+        searchCity = findViewById(R.id.searchCity)
+
+        val city = "Lisboa"
+        address.text = city
+        callCity(city)
 
         //list.adapter = ListAdapter(auxList)
         val btnInfo = this.findViewById<LinearLayout>(R.id.btnInfo)
+
 
         btnInfo.setOnClickListener {
             val intent = Intent(this, InfoActivity::class.java)
             startActivity(intent)
         }
+
+        btnGPS.setOnClickListener {
+            getLocation()
+
+        }
+
+        btnSearch.setOnClickListener {
+            callCity(searchCity.text.toString())
+            var upperCaseCity = searchCity.text.toString().toLowerCase()
+            address.text = upperCaseCity.substring(0,1).toUpperCase().plus(upperCaseCity.substring(1))
+            var final = address.text
+        }
     }
 
-    private fun callCity (){
-        var call =  API.create().getData("Lisboa")
+    private fun callCity (city: String){
+
+        var call = API.create().getData(city)
 
         call.enqueue(object : Callback<Response> {
             override fun onFailure(call: Call<Response>, t: Throwable) {
@@ -97,15 +127,11 @@ class MainActivity : AppCompatActivity() {
                     sunset.text = convertUnixToTime(it.sys.sunset.toLong())
                     todayHour.text = getCurrentDateTime()
 
-
-
-
                     wList.clear()
                     wList.addAll(it.weather)
 
                     auxList.clear()
                     auxList.addAll(it.weather)
-
 
                 }
             }
@@ -115,6 +141,49 @@ class MainActivity : AppCompatActivity() {
     private fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun getLocation() {
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
+        } else {
+            // Request location updates from the GPS provider
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
+        }
+    }
+
+    override fun onLocationChanged(location: Location) {
+        // Update the TextView with latitude and longitude
+        address.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
+
+        // Get and display the city name
+        address.text = getCityName(location.latitude, location.longitude)
+        callCity(address.text.toString())
+    }
+
+    private fun getCityName(latitude: Double, longitude: Double): String {
+        val geocoder = Geocoder(this, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        return if (addresses != null && addresses.isNotEmpty()) {
+            addresses[0].locality ?: "City not found"
+        } else {
+            "City not found"
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == locationPermissionCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
+                getLocation() // Request location updates again now that permission is granted
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.N)
