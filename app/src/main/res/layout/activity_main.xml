@@ -4,345 +4,357 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="@color/teal_700">
+    android:background="@color/teal_700"
+    tools:context=".MainActivity">
 
     <ImageView
         android:id="@+id/searchIcon"
         android:layout_width="25dp"
         android:layout_height="25dp"
+        android:layout_marginStart="70dp"
+        android:layout_marginTop="60dp"
         android:src="@drawable/ic_search"
-        app:tint="@color/white"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="70dp"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        app:tint="@color/white" />
+
+    <ImageView
+        android:id="@+id/btnFav"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="60dp"
+        android:src="@drawable/rating"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
 
     <EditText
         android:id="@+id/searchCity"
-        android:layout_width="230dp"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@id/searchIcon"
-        android:background="@color/white"
         android:layout_marginStart="20dp"
-        app:layout_constraintLeft_toLeftOf="parent"/>
+        android:background="@color/white"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/searchIcon" />
 
     <ImageView
         android:id="@+id/btnGPS"
         android:layout_width="25dp"
         android:layout_height="25dp"
-        android:src="@drawable/location"
-        app:tint="@color/white"
+        android:layout_marginTop="35dp"
         android:layout_marginEnd="22dp"
-        android:layout_marginTop="70dp"
+        android:src="@drawable/location"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintRight_toRightOf="parent"/>
+        app:tint="@color/white" />
+
+    <ImageView
+        android:id="@+id/btnMic"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="22dp"
+        android:src="@drawable/microphone"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnGPS"
+        app:tint="@color/white" />
 
     <TextView
         android:id="@+id/address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
         android:textSize="24dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:text="Lisboa"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/btnStar"
+        android:layout_width="27dp"
+        android:layout_height="27dp"
+        android:layout_marginStart="10dp"
         android:layout_marginTop="120dp"
-        />
+        android:src="@drawable/star"
+        app:layout_constraintLeft_toRightOf="@id/address"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/white" />
 
     <TextView
         android:id="@+id/updated_at"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="14dp"
+        android:layout_marginTop="160dp"
         android:text="6 September 2023, 20:08 "
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="14dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="160dp"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="18dp"
         android:layout_gravity="center"
         android:text="Nublado"
+        android:textSize="18dp"
         app:layout_constraintBottom_toTopOf="@+id/temp"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <TextView
         android:id="@+id/temp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="80dp"
-        android:fontFamily="sans-serif-thin"
         android:layout_gravity="center"
+        android:fontFamily="sans-serif-thin"
         android:text="29°C"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/text_temp_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="80dp"
         android:text="Temp Min:"
-        app:layout_constraintTop_toBottomOf="@+id/temp"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="100dp"
+        app:layout_constraintTop_toBottomOf="@+id/temp"
 
         />
+
     <TextView
         android:id="@+id/temp_min"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" 15°C"
-        app:layout_constraintTop_toBottomOf="@+id/temp"
         app:layout_constraintLeft_toRightOf="@+id/text_temp_min"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/temp" />
 
     <TextView
         android:id="@+id/text_temp_max"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
         android:text="Temp Max:"
         app:layout_constraintLeft_toRightOf="@+id/temp_min"
-        app:layout_constraintTop_toBottomOf="@+id/temp"
-        android:layout_marginStart="10dp"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/temp" />
+
     <TextView
         android:id="@+id/temp_max"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=" 30°C"
-        app:layout_constraintTop_toBottomOf="@+id/temp"
         app:layout_constraintLeft_toRightOf="@+id/text_temp_max"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/temp" />
 
     <LinearLayout
         android:id="@+id/SunriseInfo"
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/temp_min"
-        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="75dp"
-        >
+        android:layout_marginTop="40dp"
+        android:layout_weight="1"
+        android:background="#3CF1EBF1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/temp_min">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/sunrise"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/sunrise"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:text="Amanhecer"
-            />
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/sunrise"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14dp"
             android:text="06:40 AM"
-            />
+            android:textSize="14dp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/SunsetInfo"
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_marginTop="40dp"
         android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
         android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/temp_min"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="75dp"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/temp_min">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/sunset"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/sunset"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:text="Anoitecer"
-            />
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/sunset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14dp"
-            android:text="06:40 AM"/>
+            android:text="06:40 AM"
+            android:textSize="14dp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/WindInfo"
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/temp_min"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="40dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="75dp">
+        android:layout_weight="1"
+        android:background="#3CF1EBF1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/temp_min">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/wind"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/wind"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:text="Vento"
-            />
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/wind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14dp"
             android:text="06:40 AM"
-            />
+            android:textSize="14dp" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/SunriseInfo"
-        app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="5dp"
-        >
+        android:layout_weight="1"
+        android:background="#3CF1EBF1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/SunriseInfo">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/pressure"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/pressure"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
-            android:text="Pressão"/>
+            android:text="Pressão"
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/pressure"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14dp"
-            android:text="06:40 AM"/>
+            android:text="06:40 AM"
+            android:textSize="14dp" />
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_marginTop="5dp"
         android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
         android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/SunsetInfo"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginTop="5dp"
-        >
+        app:layout_constraintTop_toBottomOf="@+id/SunsetInfo">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/humidity"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/humidity"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="12dp"
             android:text="Humidade"
-            />
+            android:textSize="12dp" />
 
         <TextView
             android:id="@+id/humidity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="14dp"
-            android:text="06:40 AM"/>
+            android:text="06:40 AM"
+            android:textSize="14dp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/btnInfo"
-        android:layout_width="120dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:padding="8dp"
-        android:background="#3CF1EBF1"
-        app:layout_constraintTop_toBottomOf="@+id/WindInfo"
-        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="5dp"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="5dp">
+        android:layout_weight="1"
+        android:background="#3CF1EBF1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WindInfo">
 
         <ImageView
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:src="@drawable/info"
-            app:tint="@color/white"
             android:layout_marginBottom="5dp"
-            />
+            android:src="@drawable/info"
+            app:tint="@color/white" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="25dp"
-            android:textSize="12dp"
-            android:text="INFO"
             android:layout_marginTop="10dp"
-            />
+            android:text="INFO"
+            android:textSize="12dp" />
 
     </LinearLayout>
 

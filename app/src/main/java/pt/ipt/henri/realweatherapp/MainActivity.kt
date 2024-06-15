@@ -12,6 +12,9 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.TimeZone
 import android.os.Build
 import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.EditText
 import android.widget.ImageView
@@ -20,6 +23,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import retrofit2.Call
 import retrofit2.Callback
@@ -27,11 +31,13 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
+
 class MainActivity : AppCompatActivity(), LocationListener {
 
-    private val wList = mutableListOf<Weather>()
-    private val auxList = mutableListOf<Weather>()
     private val locationPermissionCode = 101
+    private val audioPermissionCode = 102
+    private var isFavorite: Boolean = false
+    private val favoriteCities = mutableSetOf<String>()
     private lateinit var locationManager: LocationManager
 
     private lateinit var address: TextView
@@ -48,11 +54,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var btnGPS: ImageView
     private lateinit var btnSearch: ImageView
     private lateinit var searchCity: EditText
+    private lateinit var btnMic: ImageView
+    private lateinit var btnFav: ImageView
+    private lateinit var btnStar: ImageView
 
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //enableEdgeToEdge()
+
         setContentView(R.layout.activity_main)
 
         address = findViewById(R.id.address)
@@ -69,14 +78,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
         btnGPS = findViewById(R.id.btnGPS)
         btnSearch = findViewById(R.id.searchIcon)
         searchCity = findViewById(R.id.searchCity)
+        btnMic = findViewById(R.id.btnMic)
+        btnFav = findViewById(R.id.btnFav)
+        btnStar = findViewById(R.id.btnStar)
 
         val city = "Lisboa"
         address.text = city
+
+        checkFavorite(city)
         callCity(city)
 
-        //list.adapter = ListAdapter(auxList)
         val btnInfo = this.findViewById<LinearLayout>(R.id.btnInfo)
-
 
         btnInfo.setOnClickListener {
             val intent = Intent(this, InfoActivity::class.java)
@@ -89,11 +101,30 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
 
         btnSearch.setOnClickListener {
-            callCity(searchCity.text.toString())
-            var upperCaseCity = searchCity.text.toString().toLowerCase()
-            address.text = upperCaseCity.substring(0,1).toUpperCase().plus(upperCaseCity.substring(1))
-            var final = address.text
+            if (searchCity.text.toString().isEmpty()) {
+                Toast.makeText(this, "Por favor introduz uma cidade", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }else{
+                checkFavorite(searchCity.text.toString())
+                callCity(searchCity.text.toString())
+                var upperCaseCity = searchCity.text.toString().toLowerCase()
+                address.text = upperCaseCity.substring(0,1).toUpperCase().plus(upperCaseCity.substring(1))
+            }
         }
+
+        btnMic.setOnClickListener {
+            checkAudioPermission()
+        }
+
+        btnFav.setOnClickListener {
+            val intent = Intent(this, FavouritesActivity::class.java)
+            startActivity(intent)
+        }
+
+        btnStar.setOnClickListener {
+            toggleFavorites()
+        }
+
     }
 
     private fun callCity (city: String){
@@ -110,8 +141,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             override fun onResponse(call: Call<Response>, response: retrofit2.Response<Response>) {
                 response.body()?.let {
 
-                    //homeprogress1.visibility = ViewPager.GONE
-
 //Gera um id aleatorio e coloca numa string os valores da API
                     it.weather.forEach { art ->
                         art.id = UUID.randomUUID().toString()
@@ -127,61 +156,115 @@ class MainActivity : AppCompatActivity(), LocationListener {
                     sunset.text = convertUnixToTime(it.sys.sunset.toLong())
                     todayHour.text = getCurrentDateTime()
 
-                    wList.clear()
-                    wList.addAll(it.weather)
-
-                    auxList.clear()
-                    auxList.addAll(it.weather)
-
                 }
             }
         })
     }
+
+    private fun toggleFavorites() {
+
+        val currentCity = address.text.toString().lowercase()
+        isFavorite = favoriteCities.contains(currentCity)
+
+        if (isFavorite) {
+            btnStar.setImageResource(R.drawable.star)
+            favoriteCities.remove(currentCity)
+            Toast.makeText(this, "$currentCity foi removida dos favoritos", Toast.LENGTH_SHORT).show()
+        } else {
+            btnStar.setImageResource(R.drawable.starfull)
+            favoriteCities.add(currentCity)
+            Toast.makeText(this, "$currentCity foi adicionada aos favoritos", Toast.LENGTH_SHORT).show()
+        }
+
+        isFavorite = !isFavorite
+
+        saveFavorites()
+    }
+
+    private fun saveFavorites() {
+        val sharedPreferences = getSharedPreferences("favorites", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putStringSet("favoriteCities", favoriteCities)
+        editor.apply()
+    }
+
+    private fun loadFavorites() {
+        val sharedPreferences = getSharedPreferences("favorites", Context.MODE_PRIVATE)
+        val savedFavorites = sharedPreferences.getStringSet("favoriteCities", setOf()) ?: setOf()
+        favoriteCities.clear()
+        favoriteCities.addAll(savedFavorites)
+    }
+
+    private fun checkFavorite(city: String) {
+        loadFavorites()
+        if (favoriteCities.contains(city.toLowerCase())) {
+            btnStar.setImageResource(R.drawable.starfull)
+            isFavorite = true
+        } else {
+            btnStar.setImageResource(R.drawable.star)
+            isFavorite = false
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.N)
     private fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
     }
 
+    //Função do professor
     @RequiresApi(Build.VERSION_CODES.M)
     private fun getLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), locationPermissionCode)
         } else {
-            // Request location updates from the GPS provider
+            /*  Inicia o GPS, que vai autilizar a posição de 5 em 5 segundos,
+            se a nova localização estiver pelo menos a 5 metros da última
+            localização  */
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5f, this)
         }
     }
 
     override fun onLocationChanged(location: Location) {
-        // Update the TextView with latitude and longitude
-        address.text = "Latitude: ${location.latitude}, Longitude: ${location.longitude}"
-
-        // Get and display the city name
+        // Apresenta o nome da cidade
         address.text = getCityName(location.latitude, location.longitude)
-        callCity(address.text.toString())
+
+        if (address.text.isEmpty()) {
+            Toast.makeText(this@MainActivity, "A cidade não foi encontrada", Toast.LENGTH_SHORT).show()
+        }else{
+            checkFavorite(address.text.toString())
+            callCity(address.text.toString())
+        }
     }
 
     private fun getCityName(latitude: Double, longitude: Double): String {
         val geocoder = Geocoder(this, Locale.getDefault())
         val addresses = geocoder.getFromLocation(latitude, longitude, 1)
         return if (addresses != null && addresses.isNotEmpty()) {
-            addresses[0].locality ?: "City not found"
+            addresses[0].locality ?: "A cidade não foi encontrada"
         } else {
-            "City not found"
+            "A cidade não foi encontrada"
         }
     }
 
+    //função do professor adaptada
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == locationPermissionCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-                getLocation() // Request location updates again now that permission is granted
+                Toast.makeText(this, "Location Permission Granted", Toast.LENGTH_SHORT).show()
+                getLocation()
             } else {
-                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Location Permission Denied", Toast.LENGTH_SHORT).show()
+            }
+        } else if (requestCode == audioPermissionCode) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Audio Permission Granted", Toast.LENGTH_SHORT).show()
+                speechToText()
+            } else {
+                Toast.makeText(this, "Audio Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -193,4 +276,94 @@ class MainActivity : AppCompatActivity(), LocationListener {
         format.timeZone = TimeZone.getDefault()
         return format.format(date)
     }
+    private fun checkAudioPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), audioPermissionCode)
+        } else {
+            speechToText()
+        }
+    }
+    private fun speechToText() {
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Toast.makeText(this, "Speech Recognition is not available on this device", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this)
+
+        val speechRecognitionIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Say the city name")
+        }
+
+        // Set the RecognitionListener
+        speechRecognizer.setRecognitionListener(object : RecognitionListener {
+            override fun onReadyForSpeech(params: Bundle?) {
+                Toast.makeText(this@MainActivity, "A escutar...", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onBeginningOfSpeech() {
+                // Can provide feedback that the speech input has started
+            }
+
+            override fun onRmsChanged(rmsdB: Float) {
+                // Can provide feedback on the volume level of the input speech
+            }
+
+            override fun onBufferReceived(buffer: ByteArray?) {
+                // Handle any buffer received
+            }
+
+            override fun onEndOfSpeech() {
+                // Can provide feedback that the speech input has ended
+            }
+
+            override fun onError(error: Int) {
+                val errorMessage = getErrorText(error)
+                Toast.makeText(this@MainActivity, "Error: $errorMessage", Toast.LENGTH_LONG).show()
+                Log.e("SpeechRecognizer", "Error recognizing speech: $errorMessage")
+            }
+
+            override fun onResults(results: Bundle?) {
+                val recognizedText = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.get(0)
+                if (recognizedText != null) {
+                    searchCity.setText(recognizedText)
+                    address.setText(recognizedText)
+                    checkFavorite(recognizedText)
+                    callCity(recognizedText)
+                } else {
+                    Toast.makeText(this@MainActivity, "No speech recognized, try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onPartialResults(partialResults: Bundle?) {
+                // Handle partial recognition results if needed
+            }
+
+            override fun onEvent(eventType: Int, params: Bundle?) {
+                // Handle any events during the recognition process
+            }
+        })
+
+        // Start listening for speech input
+        speechRecognizer.startListening(speechRecognitionIntent)
+    }
+
+    // Function to get a readable error message for the given error code
+    private fun getErrorText(errorCode: Int): String {
+        return when (errorCode) {
+            SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
+            SpeechRecognizer.ERROR_CLIENT -> "Client-side error"
+            SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> "Insufficient permissions"
+            SpeechRecognizer.ERROR_NETWORK -> "Network error"
+            SpeechRecognizer.ERROR_NETWORK_TIMEOUT -> "Network timeout"
+            SpeechRecognizer.ERROR_NO_MATCH -> "No match found"
+            SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> "Recognition service busy"
+            SpeechRecognizer.ERROR_SERVER -> "Server error"
+            SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> "No speech input"
+            else -> "Unknown error"
+        }
+    }
+
 }
