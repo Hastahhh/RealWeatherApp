@@ -16,6 +16,9 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -58,6 +61,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var btnFav: ImageView
     private lateinit var btnStar: ImageView
 
+
     @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,7 +87,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         btnStar = findViewById(R.id.btnStar)
 
         val city = "Lisboa"
-        address.text = city
 
         checkFavorite(city)
         callCity(city)
@@ -105,10 +108,25 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 Toast.makeText(this, "Por favor introduz uma cidade", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }else{
-                checkFavorite(searchCity.text.toString())
+                checkFavorite(searchCity.text.toString().trim())
                 callCity(searchCity.text.toString())
-                var upperCaseCity = searchCity.text.toString().toLowerCase()
-                address.text = upperCaseCity.substring(0,1).toUpperCase().plus(upperCaseCity.substring(1))
+                var upperCaseCity = searchCity.text.toString().lowercase()
+                address.text = upperCaseCity.substring(0,1).uppercase().plus(upperCaseCity.substring(1)).trim()
+                hideKeyboard()
+            }
+        }
+        searchCity.setOnEditorActionListener { _, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                checkFavorite(searchCity.text.toString().trim())
+                callCity(searchCity.text.toString())
+                var upperCaseCity = searchCity.text.toString().lowercase()
+                address.text = upperCaseCity.substring(0,1).uppercase().plus(upperCaseCity.substring(1)).trim()
+                hideKeyboard()
+                true
+            } else {
+                Toast.makeText(this, "Por favor introduz uma cidade", Toast.LENGTH_SHORT).show()
+                false
             }
         }
 
@@ -160,10 +178,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         })
     }
-
+    private fun hideKeyboard() {
+        val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(searchCity.windowToken, 0)
+    }
     private fun toggleFavorites() {
 
-        val currentCity = address.text.toString().lowercase()
+        val currentCity = address.text.toString().lowercase().trim()
         isFavorite = favoriteCities.contains(currentCity)
 
         if (isFavorite) {
@@ -175,8 +196,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             favoriteCities.add(currentCity)
             Toast.makeText(this, "$currentCity foi adicionada aos favoritos", Toast.LENGTH_SHORT).show()
         }
-
-        isFavorite = !isFavorite
 
         saveFavorites()
     }
@@ -197,7 +216,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private fun checkFavorite(city: String) {
         loadFavorites()
-        if (favoriteCities.contains(city.toLowerCase())) {
+        if (favoriteCities.contains(city.lowercase())) {
             btnStar.setImageResource(R.drawable.starfull)
             isFavorite = true
         } else {
@@ -233,7 +252,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (address.text.isEmpty()) {
             Toast.makeText(this@MainActivity, "A cidade não foi encontrada", Toast.LENGTH_SHORT).show()
         }else{
-            checkFavorite(address.text.toString())
+            checkFavorite(address.text.toString().trim())
             callCity(address.text.toString())
         }
     }
@@ -330,7 +349,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 if (recognizedText != null) {
                     searchCity.setText(recognizedText)
                     address.setText(recognizedText)
-                    checkFavorite(recognizedText)
+                    checkFavorite(recognizedText.trim())
                     callCity(recognizedText)
                 } else {
                     Toast.makeText(this@MainActivity, "No speech recognized, try again.", Toast.LENGTH_SHORT).show()

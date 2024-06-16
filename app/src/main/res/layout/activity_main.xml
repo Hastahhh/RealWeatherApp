@@ -31,6 +31,9 @@
 
     <EditText
         android:id="@+id/searchCity"
+        android:imeOptions="actionSearch"
+        android:inputType="text"
+        android:singleLine="true"
         android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"

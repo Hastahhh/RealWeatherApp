@@ -7,5 +7,16 @@
     tools:context=".FavouritesActivity"
     android:background="@color/teal_700">
 
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/listFav"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="100dp"
+        android:layout_marginStart="17dp"
+        android:layout_marginEnd="2dp"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
