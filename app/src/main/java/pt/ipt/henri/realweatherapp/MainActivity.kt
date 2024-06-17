@@ -93,16 +93,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         val btnInfo = this.findViewById<LinearLayout>(R.id.btnInfo)
 
+        //redireciona para a atividade da info
         btnInfo.setOnClickListener {
             val intent = Intent(this, InfoActivity::class.java)
             startActivity(intent)
         }
-
+        //executa o código do botão do GPS
         btnGPS.setOnClickListener {
             getLocation()
 
         }
-
+        //executa o código de pesquisa
         btnSearch.setOnClickListener {
             if (searchCity.text.toString().isEmpty()) {
                 Toast.makeText(this, "Por favor introduz uma cidade", Toast.LENGTH_SHORT).show()
@@ -115,6 +116,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 hideKeyboard()
             }
         }
+        //Executa o codigo de pesquisa do keyboard
         searchCity.setOnEditorActionListener { _, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                 event?.keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
@@ -129,22 +131,22 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 false
             }
         }
-
+        //Executa o código do microfone
         btnMic.setOnClickListener {
             checkAudioPermission()
         }
-
+        //Redireciona para a atividade dos favoritos
         btnFav.setOnClickListener {
             val intent = Intent(this, FavouritesActivity::class.java)
-            startActivity(intent)
+            startActivityForResult(intent, REQUEST_CODE_FAVORITES)
         }
-
+        //Remove ou adiciona aos favoritos
         btnStar.setOnClickListener {
             toggleFavorites()
         }
 
     }
-
+    //Função que executa a chamada à API
     private fun callCity (city: String){
 
         var call = API.create().getData(city)
@@ -159,9 +161,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             override fun onResponse(call: Call<Response>, response: retrofit2.Response<Response>) {
                 response.body()?.let {
 
-//Gera um id aleatorio e coloca numa string os valores da API
+                    //Preenche os dados na tela
                     it.weather.forEach { art ->
-                        art.id = UUID.randomUUID().toString()
                         status.text = art.description
                     }
                     tempMin.text = it.main.temp_min.replaceAfter(".", "").replace(".", "") + "°C"
@@ -178,42 +179,47 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         })
     }
+    //Função que esconde o teclado
+    //https://stackoverflow.com/questions/41790357/close-hide-the-android-soft-keyboard-with-kotlin
     private fun hideKeyboard() {
         val inputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(searchCity.windowToken, 0)
     }
+    //função que adiciona ou remove aos favoritos
     private fun toggleFavorites() {
 
-        val currentCity = address.text.toString().lowercase().trim()
+        var currentCity = address.text.toString().lowercase().trim()
         isFavorite = favoriteCities.contains(currentCity)
 
         if (isFavorite) {
             btnStar.setImageResource(R.drawable.star)
             favoriteCities.remove(currentCity)
+            currentCity = currentCity.substring(0,1).uppercase().plus(currentCity.substring(1))
             Toast.makeText(this, "$currentCity foi removida dos favoritos", Toast.LENGTH_SHORT).show()
         } else {
             btnStar.setImageResource(R.drawable.starfull)
             favoriteCities.add(currentCity)
+            currentCity = currentCity.substring(0,1).uppercase().plus(currentCity.substring(1))
             Toast.makeText(this, "$currentCity foi adicionada aos favoritos", Toast.LENGTH_SHORT).show()
         }
 
         saveFavorites()
     }
-
+    //Função que serve para guardar e apagar cidades na sharedpreference
     private fun saveFavorites() {
         val sharedPreferences = getSharedPreferences("favorites", Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()
         editor.putStringSet("favoriteCities", favoriteCities)
         editor.apply()
     }
-
+    //Função que carrega as cidades guardadas na shared preference
     private fun loadFavorites() {
         val sharedPreferences = getSharedPreferences("favorites", Context.MODE_PRIVATE)
         val savedFavorites = sharedPreferences.getStringSet("favoriteCities", setOf()) ?: setOf()
         favoriteCities.clear()
         favoriteCities.addAll(savedFavorites)
     }
-
+    //Função que valida se a cidade é favorita para adicionar um estrela preenchida ou vazia
     private fun checkFavorite(city: String) {
         loadFavorites()
         if (favoriteCities.contains(city.lowercase())) {
@@ -224,14 +230,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
             isFavorite = false
         }
     }
-
+    //Retorna a hora atual do sistema
     @RequiresApi(Build.VERSION_CODES.N)
     private fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("d MMMM yyyy, HH:mm", Locale.getDefault())
         return dateFormat.format(Date())
     }
 
-    //Função do professor
+    //Função do professor para utilizar o GPS do android
     @RequiresApi(Build.VERSION_CODES.M)
     private fun getLocation() {
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -246,7 +252,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     override fun onLocationChanged(location: Location) {
-        // Apresenta o nome da cidade
+
         address.text = getCityName(location.latitude, location.longitude)
 
         if (address.text.isEmpty()) {
@@ -278,6 +284,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             } else {
                 Toast.makeText(this, "Location Permission Denied", Toast.LENGTH_SHORT).show()
             }
+            //contem permissões de audio
         } else if (requestCode == audioPermissionCode) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Audio Permission Granted", Toast.LENGTH_SHORT).show()
@@ -287,7 +294,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         }
     }
-
+    //Converte a data unix para a hora do sistema
+    //https://stackoverflow.com/questions/47250263/kotlin-convert-timestamp-to-datetime
     @RequiresApi(Build.VERSION_CODES.N)
     private fun convertUnixToTime(unixTimestamp: Long): String {
         val date = Date(unixTimestamp * 1000)
@@ -295,6 +303,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         format.timeZone = TimeZone.getDefault()
         return format.format(date)
     }
+    //Função que verifica as permissões do microfone
     private fun checkAudioPermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), audioPermissionCode)
@@ -302,6 +311,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             speechToText()
         }
     }
+    //Função para utilizar o microfone do android
     private fun speechToText() {
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             Toast.makeText(this, "Speech Recognition is not available on this device", Toast.LENGTH_SHORT).show()
@@ -365,11 +375,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             }
         })
 
-        // Start listening for speech input
+        // Começa a ouvir
         speechRecognizer.startListening(speechRecognitionIntent)
     }
 
-    // Function to get a readable error message for the given error code
+    // Função para retornar a descrição do erro para o microfone
     private fun getErrorText(errorCode: Int): String {
         return when (errorCode) {
             SpeechRecognizer.ERROR_AUDIO -> "Audio recording error"
@@ -384,5 +394,22 @@ class MainActivity : AppCompatActivity(), LocationListener {
             else -> "Unknown error"
         }
     }
+    //Função que recebe o resultado da atividade dos favoritos, selectedCity = cidade que API vai utilizar de input
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CODE_FAVORITES && resultCode == RESULT_OK) {
+            var selectedCity = data?.getStringExtra("selectedCity")
+            if (selectedCity != null) {
+                selectedCity = selectedCity.substring(0,1).uppercase().plus(selectedCity.substring(1))
+                address.text = selectedCity
 
+                callCity(selectedCity)
+                checkFavorite(selectedCity)
+            }
+        }
+    }
+
+    companion object {
+        private const val REQUEST_CODE_FAVORITES = 1
+    }
 }

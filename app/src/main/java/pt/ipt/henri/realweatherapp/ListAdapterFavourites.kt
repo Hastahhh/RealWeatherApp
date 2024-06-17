@@ -10,8 +10,10 @@ import pt.ipt.henri.realweatherapp.R
 import java.util.Locale
 
 class CityAdapter(
+
     private val context: Context,
     private var cityList: MutableList<String>,
+    private val onCityClicked: (String) -> Unit,
     private val onCityRemoved: (String) -> Unit
 ) : RecyclerView.Adapter<CityAdapter.CityViewHolder>() {
 
@@ -22,11 +24,15 @@ class CityAdapter(
 
     override fun onBindViewHolder(holder: CityViewHolder, position: Int) {
         val cityName = cityList[position]
-        holder.cityName.text = cityName
+        holder.cityName.text = cityName.substring(0,1).uppercase().plus(cityName.substring(1))
 
+        //remove dos favoritos
         holder.btnStar.setOnClickListener {
-            removeCityFromFavorites(cityName)
             onCityRemoved(cityName)
+        }
+        //carrega a cidade favorita para a main
+        holder.itemView.setOnClickListener {
+            onCityClicked(cityName)
         }
     }
 
@@ -37,14 +43,4 @@ class CityAdapter(
         val btnStar: ImageView = itemView.findViewById(R.id.btnStar)
     }
 
-    private fun removeCityFromFavorites(city: String) {
-
-        cityList.remove(city)
-        notifyDataSetChanged()
-
-        val sharedPreferences: SharedPreferences = context.getSharedPreferences("favorites", Context.MODE_PRIVATE)
-        val favoriteCities = sharedPreferences.getStringSet("favoriteCities", mutableSetOf()) ?: mutableSetOf()
-        favoriteCities.remove(city.lowercase(Locale.getDefault()))
-        sharedPreferences.edit().putStringSet("favoriteCities", favoriteCities).apply()
-    }
 }
